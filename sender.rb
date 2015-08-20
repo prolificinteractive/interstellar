@@ -4,24 +4,29 @@ require 'date'
 require 'csv'
 require 'yaml'
 
-CONFIG = YAML.load_file('./secrets/secrets.yml')
-
+CONFIG = YAML.load_file( File.dirname(__FILE__) + '/secrets/secrets.yml')
 date = Date.today-2
 
 file_date = date.strftime("%Y%m")
-csv_file_name = "#{CONFIG["package_name"]}_#{file_date}.csv"
+csv_file_name = "reviews_#{CONFIG["package_name"]}_#{file_date}.csv"
 
-system "BOTO_PATH=./secrets/.boto gsutil/gsutil cp -r gs://#{CONFIG["app_repo"]}/reviews/#{csv_file_name} ."
+system "BOTO_PATH=#{File.dirname(__FILE__)}/secrets/.boto #{File.dirname(__FILE__)}/gsutil/gsutil cp -r gs://#{CONFIG["app_repo"]}/reviews/#{csv_file_name} ."
 
 
 class Slack
   def self.notify(message)
-    RestClient.post CONFIG["slack_url"], {
-      payload:
-      { text: message }.to_json
-    },
-    content_type: :json,
-    accept: :json
+    CONFIG["slack_urls"].each do |url|
+      RestClient.post url, {
+	payload:
+	  { text: message }.to_json
+	},
+	content_type: :json,
+	accept: :json
+    end
+  end
+
+  def self.debug_notify(message)
+	puts message.to_json
   end
 end
 
@@ -42,8 +47,11 @@ class Review
 
     if message != ""
       Slack.notify(message)
+      #Slack.debug_notify(message)
     else
       print "No new reviews\n"
+      Slack.notify("No new reviews")
+      #Slack.debug_notify("No new reviews")
     end
   end
 
@@ -65,8 +73,15 @@ class Review
 
   def notify_to_slack
     if text || title
-      message = "*Rating: #{rate}* | version: #{version} | subdate: #{submitted_at}\n #{[title, text].join(" ")}\n <#{url}|Ответить в Google play>"
+      message = "*Rating: #{rate}* | version: #{version} | subdate: #{submitted_at}\n #{[title, text].join(" ")}\n <#{CONFIG['app_url']}| Go To App>"
       Slack.notify(message)
+    end
+  end
+
+  def debug_notify
+    if text || title
+      message = "*Rating: #{rate}* | version: #{version} | subdate: #{submitted_at}\n #{[title, text].join(" ")}\n <#{CONFIG['app_url']}| Go To App>"
+      puts message
     end
   end
 
@@ -83,7 +98,7 @@ class Review
       "\n\n#{stars}",
       "Version: #{version} | #{date}",
       "#{[title, text].join(" ")}",
-      "<#{url}|Ответить в Google play>"
+      "<#{CONFIG['app_url']}| Go To Play Store for #{CONFIG['app_name']}>"
     ].join("\n")
   end
 end
