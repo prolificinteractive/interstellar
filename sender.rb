@@ -106,6 +106,10 @@ end
 CSV.foreach(csv_file_name, encoding: 'bom|utf-16le', headers: true) do |row|
   # If there is no reply - push this review
   if row[11].nil?
+    app_version = nil
+  	if row[1]
+	  app_version = CONFIG['app_versions'][row[1].encode("UTF-8")]
+	end
     Review.collection << Review.new({
       text: row[10],
       title: row[9],
@@ -115,7 +119,7 @@ CSV.foreach(csv_file_name, encoding: 'bom|utf-16le', headers: true) do |row|
       rate: row[8],
       device: row[3],
       url: row[14],
-      version: row[1],
+      version: app_version,
     })
   end
 end
