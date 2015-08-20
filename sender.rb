@@ -119,7 +119,7 @@ CSV.foreach(csv_file_name, encoding: 'bom|utf-16le', headers: true) do |row|
       rate: row[8],
       device: row[3],
       url: row[14],
-      version: app_version,
+      version: app_version || row[1],
     })
   end
 end
