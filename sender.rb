@@ -87,18 +87,19 @@ class Review
 
   def build_message
     date = if edited
-             "subdate: #{original_subitted_at.strftime("%d.%m.%Y at %I:%M%p")}, edited at: #{submitted_at.strftime("%d.%m.%Y at %I:%M%p")}"
+             "Date: #{original_subitted_at.strftime("%m.%d.%Y at %I:%M%p")}, edited at: #{submitted_at.strftime("%m.%d.%Y at %I:%M%p")}"
            else
-             "subdate: #{submitted_at.strftime("%d.%m.%Y at %I:%M%p")}"
+             "Date: #{submitted_at.strftime("%m.%d.%Y at %I:%M%p")}"
            end
 
     stars = rate.times.map{"★"}.join + (5 - rate).times.map{"☆"}.join
 
     [
       "\n\n#{stars}",
+      "<#{url} | #{title} >",
+      "#{text}",
+      "<#{url}| Permalink >",
       "Version: #{version} | #{date}",
-      "#{[title, text].join(" ")}",
-      "<#{CONFIG['app_url']}| Go To Play Store for #{CONFIG['app_name']}>"
     ].join("\n")
   end
 end
