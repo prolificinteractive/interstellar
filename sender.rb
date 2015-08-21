@@ -87,9 +87,9 @@ class Review
 
   def build_message
     date = if edited
-             "Date: #{original_subitted_at.strftime("%m.%d.%Y at %I:%M%p")}, edited at: #{submitted_at.strftime("%m.%d.%Y at %I:%M%p")}"
+             "Date: #{original_subitted_at.strftime("%m/%d/%Y at %I:%M%p")}, edited at: #{submitted_at.strftime("%m/%d/%Y at %I:%M%p")}"
            else
-             "Date: #{submitted_at.strftime("%m.%d.%Y at %I:%M%p")}"
+             "Date: #{submitted_at.strftime("%m/%d/%Y at %I:%M%p")}"
            end
 
     stars = rate.times.map{"★"}.join + (5 - rate).times.map{"☆"}.join
