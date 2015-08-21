@@ -99,7 +99,7 @@ class Review
       "<#{url} | #{title} >",
       "#{text}",
       "<#{url}| Permalink >",
-      "Version: #{version} | #{date}",
+      "For v#{version} | #{date}",
     ].join("\n")
   end
 end
