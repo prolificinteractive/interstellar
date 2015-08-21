@@ -98,7 +98,7 @@ class Review
       "\n\n#{stars}",
       "<#{url} | #{title} >",
       "#{text}",
-      "<#{CONFIG['app_url']}| Go To Play Store for #{CONFIG['app_name']}>"
+      "<#{url}| Permalink >",
       "Version: #{version} | #{date}",
     ].join("\n")
   end
