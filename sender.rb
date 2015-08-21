@@ -96,9 +96,10 @@ class Review
 
     [
       "\n\n#{stars}",
-      "Version: #{version} | #{date}",
-      "#{[title, text].join(" ")}",
+      "<#{url} | #{title} >",
+      "#{text}",
       "<#{CONFIG['app_url']}| Go To Play Store for #{CONFIG['app_name']}>"
+      "Version: #{version} | #{date}",
     ].join("\n")
   end
 end
