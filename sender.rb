@@ -5,6 +5,7 @@ require 'csv'
 require 'yaml'
 
 CONFIG = YAML.load_file( File.dirname(__FILE__) + '/secrets/secrets.yml')
+#CONFIG = YAML.load_file( File.dirname(__FILE__) + '/secrets/dev-secrets.yml')
 date = Date.today-2
 
 file_date = date.strftime("%Y%m")
@@ -14,14 +15,27 @@ system "BOTO_PATH=#{File.dirname(__FILE__)}/secrets/.boto #{File.dirname(__FILE_
 
 
 class Slack
-  def self.notify(message)
+
+  def self.notify(messages)
+
+    attachments = messages.map do |msg|  
+      {
+        "fallback" => "New review",
+        "color" => "#019edb",
+        "pretext" => msg[:title],
+        "text" => "#{msg[:text]}\n#{msg[:version]}\n#{msg[:link]}",
+        "title" => msg[:stars],
+        "mrkdwn_in" => ["pretext"]
+      }
+    end
+
     CONFIG["slack_urls"].each do |url|
       RestClient.post url, {
-	payload:
-	  { text: message }.to_json
-	},
-	content_type: :json,
-	accept: :json
+      payload:
+        {"attachments" => attachments}.to_json
+      },
+      content_type: :json,
+      accept: :json
     end
   end
 
@@ -42,8 +56,7 @@ class Review
       r.submitted_at
     end.map do |r|
       r.build_message
-    end.join("\n")
-
+    end
 
     if message != ""
       Slack.notify(message)
@@ -94,13 +107,13 @@ class Review
 
     stars = rate.times.map{"★"}.join + (5 - rate).times.map{"☆"}.join
 
-    [
-      "\n\n#{stars}",
-      "<#{url} | #{title} >",
-      "#{text}",
-      "<#{url}| Permalink >",
-      "For v#{version} | #{date}",
-    ].join("\n")
+    {
+      stars:   "#{stars}",
+      title:   "#{title}",
+      text:    "#{text}",
+      link:    "<#{url}| Permalink >",
+      version: "For v#{version} | #{date}",
+    }
   end
 end
 
@@ -112,15 +125,15 @@ CSV.foreach(csv_file_name, encoding: 'bom|utf-16le', headers: true) do |row|
 	  app_version = CONFIG['app_versions'][row[1].encode("UTF-8")]
 	end
     Review.collection << Review.new({
-      text: row[10],
-      title: row[9],
+      text: row[10] || "No Message",
+      title: row[9] || "No Title",
       submitted_at: row[6],
       edited: (row[4] != row[6]),
       original_subitted_at: row[4],
       rate: row[8],
       device: row[3],
-      url: row[14],
-      version: app_version || row[1],
+      url: CONFIG['app_url'],
+      version: app_version || row[1] || " unspecified",
     })
   end
 end
