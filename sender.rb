@@ -112,7 +112,7 @@ class Review
       title:   "#{title}",
       text:    "#{text}",
       link:    "<#{url}| Permalink >",
-      version: "For v#{version} | #{date}",
+      version: "For #{CONFIG['app_name']} v#{version} | #{date}",
     }
   end
 end
